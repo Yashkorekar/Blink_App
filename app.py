@@ -7,6 +7,7 @@ from collections import deque
 import dlib
 import numpy as np
 from scipy.spatial import distance
+from data_logger import DataLogger
 
 class FaceAnalyzer:
     def __init__(self):
@@ -84,7 +85,7 @@ class CameraApp:
         self.stop_camera = False
         self.cap = None
         self.face_analyzer = FaceAnalyzer()
-        
+        self.data_logger = DataLogger()
         self.setup_ui()
 
     def setup_ui(self):
@@ -125,6 +126,7 @@ class CameraApp:
     def capture_frames(self):
         prev_time = 0
         fps_limit = 30
+        frame_count = 0
         fps_history = deque(maxlen=30)
 
         while not self.stop_camera:
@@ -143,10 +145,13 @@ class CameraApp:
             if elapsed_time > 0:
                 fps_history.append(1 / elapsed_time)
             avg_fps = sum(fps_history) / len(fps_history)
-
+            frame_count += 1
             processed_frame = self.face_analyzer.process_frame(frame)
 
             self.blink_label.config(text=f"Blinks: {self.face_analyzer.blink_counter}")
+
+            if frame_count % 30 == 0:  # Log data every 30 frames
+                self.data_logger.log_data(self.face_analyzer.blink_counter)
 
             cv2.putText(processed_frame, 
                        f"FPS: {int(avg_fps)} | Blinks: {self.face_analyzer.blink_counter}", 
@@ -159,6 +164,7 @@ class CameraApp:
 
         self.cap.release()
         cv2.destroyAllWindows()
+        self.data_logger.close()
 
     def stop_camera_func(self):
         self.stop_camera = True
