@@ -8,6 +8,7 @@ import dlib
 import numpy as np
 from scipy.spatial import distance
 from data_logger import DataLogger
+from performance_logger import PerformanceLogger
 
 class FaceAnalyzer:
     def __init__(self):
@@ -86,6 +87,7 @@ class CameraApp:
         self.cap = None
         self.face_analyzer = FaceAnalyzer()
         self.data_logger = DataLogger()
+        self.performance_logger = PerformanceLogger()
         self.setup_ui()
 
     def setup_ui(self):
@@ -116,6 +118,7 @@ class CameraApp:
     def start_camera(self):
         self.stop_camera = False
         self.cap = cv2.VideoCapture(0)
+        self.performance_logger.start_logging()
 
         if not self.cap.isOpened():
             messagebox.showerror("Error", "Could not open camera.")
@@ -168,6 +171,9 @@ class CameraApp:
 
     def stop_camera_func(self):
         self.stop_camera = True
+        self.performance_logger.stop_logging()
+        summary = self.performance_logger.get_performance_summary()
+        print(summary)
 
     def run(self):
         self.app.mainloop()
