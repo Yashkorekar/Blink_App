@@ -1,0 +1,8 @@
+Flask
+sqlite3
+opencv-python
+dlib
+numpy
+Pillow
+psutil
+threading
